@@ -1,136 +1,122 @@
-// Java program to illustrate Banker's Algorithm
-import java.util.*;
+# Python3 program to illustrate
+# Banker's Algorithm
 
-class GFG
-{
+# Number of processes
+P = 5
 
-// Number of processes
-static int P = 5;
+# Number of resources
+R = 3
 
-// Number of resources
-static int R = 3;
+# Function to find the need of each process
+def calculateNeed(need, maxm, allot):
 
-// Function to find the need of each process
-static void calculateNeed(int need[][], int maxm[][],
-				int allot[][])
-{
-	// Calculating Need of each P
-	for (int i = 0 ; i < P ; i++)
-		for (int j = 0 ; j < R ; j++)
+	# Calculating Need of each P
+	for i in range(P):
+		for j in range(R):
+			
+			# Need of instance = maxm instance -
+			# allocated instance
+			need[i][j] = maxm[i][j] - allot[i][j]
 
-			// Need of instance = maxm instance -
-			//				 allocated instance
-			need[i][j] = maxm[i][j] - allot[i][j];
-}
+# Function to find the system is in
+# safe state or not
+def isSafe(processes, avail, maxm, allot):
+	need = []
+	for i in range(P):
+		l = []
+		for j in range(R):
+			l.append(0)
+		need.append(l)
+		
+	# Function to calculate need matrix
+	calculateNeed(need, maxm, allot)
 
-// Function to find the system is in safe state or not
-static boolean isSafe(int processes[], int avail[], int maxm[][],
-			int allot[][])
-{
-	int [][]need = new int[P][R];
+	# Mark all processes as infinish
+	finish = [0] * P
+	
+	# To store safe sequence
+	safeSeq = [0] * P
 
-	// Function to calculate need matrix
-	calculateNeed(need, maxm, allot);
+	# Make a copy of available resources
+	work = [0] * R
+	for i in range(R):
+		work[i] = avail[i]
 
-	// Mark all processes as infinish
-	boolean []finish = new boolean[P];
+	# While all processes are not finished
+	# or system is not in safe state.
+	count = 0
+	while (count < P):
+		
+		# Find a process which is not finish
+		# and whose needs can be satisfied
+		# with current work[] resources.
+		found = False
+		for p in range(P):
+		
+			# First check if a process is finished,
+			# if no, go for next condition
+			if (finish[p] == 0):
+			
+				# Check if for all resources
+				# of current P need is less
+				# than work
+				for j in range(R):
+					if (need[p][j] > work[j]):
+						break
+					
+				# If all needs of p were satisfied.
+				if (j == R - 1):
+				
+					# Add the allocated resources of
+					# current P to the available/work
+					# resources i.e.free the resources
+					for k in range(R):
+						work[k] += allot[p][k]
 
-	// To store safe sequence
-	int []safeSeq = new int[P];
+					# Add this process to safe sequence.
+					safeSeq[count] = p
+					count += 1
 
-	// Make a copy of available resources
-	int []work = new int[R];
-	for (int i = 0; i < R ; i++)
-		work[i] = avail[i];
+					# Mark this p as finished
+					finish[p] = 1
 
-	// While all processes are not finished
-	// or system is not in safe state.
-	int count = 0;
-	while (count < P)
-	{
-		// Find a process which is not finish and
-		// whose needs can be satisfied with current
-		// work[] resources.
-		boolean found = false;
-		for (int p = 0; p < P; p++)
-		{
-			// First check if a process is finished,
-			// if no, go for next condition
-			if (finish[p] == false)
-			{
-				// Check if for all resources of
-				// current P need is less
-				// than work
-				int j;
-				for (j = 0; j < R; j++)
-					if (need[p][j] > work[j])
-						break;
+					found = True
+				
+		# If we could not find a next process
+		# in safe sequence.
+		if (found == False):
+			print("System is not in safe state")
+			return False
+		
+	# If system is in safe state then
+	# safe sequence will be as below
+	print("System is in safe state.",
+			"\nSafe sequence is: ", end = " ")
+	print(*safeSeq)
 
-				// If all needs of p were satisfied.
-				if (j == R)
-				{
-					// Add the allocated resources of
-					// current P to the available/work
-					// resources i.e.free the resources
-					for (int k = 0 ; k < R ; k++)
-						work[k] += allot[p][k];
+	return True
 
-					// Add this process to safe sequence.
-					safeSeq[count++] = p;
+# Driver code
+if __name__ =="__main__":
+	
+	processes = [0, 1, 2, 3, 4]
 
-					// Mark this p as finished
-					finish[p] = true;
+	# Available instances of resources
+	avail = [3, 3, 2]
 
-					found = true;
-				}
-			}
-		}
+	# Maximum R that can be allocated
+	# to processes
+	maxm = [[7, 5, 3], [3, 2, 2],
+			[9, 0, 2], [2, 2, 2],
+			[4, 3, 3]]
 
-		// If we could not find a next process in safe
-		// sequence.
-		if (found == false)
-		{
-			System.out.print("System is not in safe state");
-			return false;
-		}
-	}
+	# Resources allocated to processes
+	allot = [[0, 1, 0], [2, 0, 0],
+			[3, 0, 2], [2, 1, 1],
+			[0, 0, 2]]
 
-	// If system is in safe state then
-	// safe sequence will be as below
-	System.out.print("System is in safe state.\nSafe"
-		+" sequence is: ");
-	for (int i = 0; i < P ; i++)
-		System.out.print(safeSeq[i] + " ");
+	# Check system is in safe state or not
+	isSafe(processes, avail, maxm, allot)
 
-	return true;
-}
-
-// Driver code
-public static void main(String[] args)
-{
-	int processes[] = {0, 1, 2, 3, 4};
-
-	// Available instances of resources
-	int avail[] = {3, 3, 2};
-
-	// Maximum R that can be allocated
-	// to processes
-	int maxm[][] = {{7, 5, 3},
-					{3, 2, 2},
-					{9, 0, 2},
-					{2, 2, 2},
-					{4, 3, 3}};
-
-	// Resources allocated to processes
-	int allot[][] = {{0, 1, 0},
-					{2, 0, 0},
-					{3, 0, 2},
-					{2, 1, 1},
-					{0, 0, 2}};
-
-	// Check system is in safe state or not
-	isSafe(processes, avail, maxm, allot);
-}
-}
-
-// This code has been contributed by 29AjayKumar
+# This code is contributed by
+# Shubham Singh(SHUBHAMSINGH10)
